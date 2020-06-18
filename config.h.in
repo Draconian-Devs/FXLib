@@ -1,0 +1,77 @@
+#pragma once
+#include <cstdlib>
+
+/// The name of the library that will show up in the FiveM logs whenever an event or error occurs.
+#define LIB_NAME "@PROJECT_NAME@"
+
+/// The date that the project was built in ISO-8601 date formatting (YYYY-MM-DD UTC-0).
+#define BUILD_DATE "@PROJECT_BUILD_DATE@"
+
+/// The major release build of the library.
+/// @note Compatibility might not be available between major releases.
+#define VER_MAJOR "@PROJECT_VERSION_MAJOR@"
+
+/// The minor release build of the library.
+/// @note Compatibility is only guaranteed between minor releases as long as the major versions match.
+#define VER_MINOR "@PROJECT_VERSION_MINOR@"
+
+/// The current build of the library.
+/// @note Alpha builds must precede beta builds. Beta builds must precede release candidates.
+#define VER_BUILD "@PROJECT_VERSION_PATCH@"
+
+/// The major build of the library but in the form of an unsigned long integer.
+static const unsigned long VER_MAJOR_LONG = strtoul(VER_MAJOR, NULL, 10);
+
+/// The minor build of the library but in the form of an unsigned long integer.
+static const unsigned long VER_MINOR_LONG = strtoul(VER_MINOR, NULL, 10);
+
+/// The release build of the library but in the form of an unsigned long integer.
+static const unsigned long VER_BUILD_LONG = strtoul(VER_BUILD, NULL, 10);
+
+/* More information on the versioning system:
+ *
+ * The way the versioning system is set up we have three distinctive numerical values.
+ *   - The major version number.
+ *   - The minor version number.
+ *   - The version build number.
+ *
+ * The major version is reserved for releases that qualify as major builds. There is no guarantee that projects
+ *  of differing major release versions will be cross-compatible with one-another. The reasoning behind this is
+ *  that each major release will differ significantly from one-another and cross-compatibility is usually not a
+ *  conscious design choice.
+ *
+ * The minor version is reserved for various minor updates to the preceding builds under the same major release.
+ *   - Method deprecations (not removals, method removals aren't allowed due to breaking cross-compatibility).
+ *   - Method modification (excluding method name changes, argument changes, or type changes).
+ *   - Adding new methods.
+ *
+ * Essentially any modification that adds or deprecates a namespace, class, function, or method can qualify as a
+ *  new minor version as long as it maintains compatibility with the other builds within the same major version.
+ *
+ * The version build number is used to declare the operational state of the current build.
+ *   - 0 is reserved for releases.           These must pass 100% of the unit tests to qualify as release builds.
+ *   - 1 is reserved for alphas.             These must pass  25% of the unit tests to qualify as   alpha builds.
+ *   - 2 is reserved for betas.              These must pass  50% of the unit tests to qualify as    beta builds.
+ *   - 3 is reserved for release candidates. These must pass  75% of the unit tests to qualify as release candidates.
+ *   - 4 is reserved for developer builds.   These do not have to pass any of the unit tests to qualify as dev builds.
+ *
+ * Developer builds are never meant to be suitable for live environments and should never be used on a live environment.
+ *  This is why we don't have to pass any of the unit tests in order to release a developer build of this library.
+ *
+ * There is an expectation that the unit tests will change over time, so each of the builds will be marked to signify
+ *  that they do not meet the standards of the most recent build that passes the updated unit tests.
+ */
+
+/* We will use this function to convert the build ID to its string representation. */
+extern "C" const char *get_build_string(void) {
+    switch (VER_BUILD_LONG) {
+        case 1lu: return "ALPHA"; /* If our version is x.y.1 then we are using an alpha build.            */
+        case 2lu: return "BETA";  /* If our version is x.y.2 then we are using a beta build.              */
+        case 3lu: return "RC";    /* If our version is x.y.3 then we are using a release candidate build. */
+        case 4lu: return "INDEV"; /* If our version is x.y.4 then we are using a developer build.         */
+        default:  return "";      /* If our version is x.y.0 then we are using a release build.           */
+    }
+}
+
+/// The current build of the library in the format of a string.
+#define BUILD_STRING get_build_string()
